@@ -1,0 +1,42 @@
+---
+import type { filter_desc } from './filter';
+import { reject_sentinel } from './filter';
+---
+start       := lines={statement | comment | eol}+ $
+statement   := using | settings | pclass | macro | words | reject | filter | spelling
+
+using       := 'using:' _modules={ws name=name}+ eol
+                .modules = string[] { return _modules.map(s => s.name); }
+
+settings    := 'settings:' _settings={ws name=name ws? '=' ws? value=value}+ eol
+                .settings = Map<string, any> { return new Map(_settings.map(s => [s.name, s.value.value])); }
+
+pclass      := name='[A-Z]' ws? '=' ws? first=phoneme rest={ws phoneme=phoneme}* eol
+                .phonemes = string[] { return [this.first, ...rest.map(s => s.phoneme)]; }
+
+macro       := name='\$[A-Z]' ws? '=' ws? value=phoneme eol
+
+words       := 'words:' _patterns={ws pattern='[A-Z?\$]+'}+ eol
+                .patterns = string[] { return _patterns.map(s => s.pattern); }
+
+reject      := 'reject:' _patterns={ws pattern=phoneme}+ eol
+                .patterns = Array<filter_desc> { return _patterns.map(s => [s.pattern, reject_sentinel]); }
+
+filter      := 'filter:' ws first=filter_pat rest={ ws? ';' ws? pattern=filter_pat }* ';'? eol
+                .patterns = Array<filter_desc> { return [this.first.value, ...this.rest.map(s => s.pattern.value)]; }
+spelling    := 'spelling:' ws first=filter_pat rest={ ws? ';' ws? pattern=filter_pat }* ';'? eol
+                .patterns = Array<filter_desc> { return [this.first.value, ...this.rest.map(s => s.pattern.value)]; }
+filter_pat  := from=phoneme ws? '>' ws? to=phoneme
+                .value = filter_desc { return [this.from, this.to]; }
+
+eol         := ws? '\n'
+ws          := '[\t ]+'
+comment     := {'^#.*'m | ws} eol
+
+phoneme     := '[^\s`:;!]+'
+
+value       := num | str
+name        := '[A-Za-z][A-Za-z0-9_-]*'
+num         := _value='[0-9]+'
+                .value = number { return parseInt(this._value); }
+str         := '"' value='[^"]*' '"'

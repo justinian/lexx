@@ -1,0 +1,24 @@
+using: foobar batbax
+settings: random-rate=50 name="mike"
+
+S = s ʃ f
+C = p t k b d g m n l r s ʃ z ʒ ʧ
+L = r l w j
+F = s ʃ z ʒ ʧ
+
+W = a ɯ o
+V = a i u e o
+K = ɲ ʧ kj gj ɾj mj hj pj bj ʤj
+N = n
+
+# words: S?C?L?VC?V
+
+$S = CVC?F?
+words: SLVC?$S $S$S $S $S$S$S
+
+reject: [sʃf][sʃ] (.)\1 [rl][rl] ^lr
+
+# filter: ti > ʧi; si > ʃi; tɯ > tsɯ; hɯ > fɯ; zi > ʤi; za > tsa
+
+spelling: ɲ > ng; j > y; ɯ > u;
+spelling: ʧ > ch; ʃ > sh; ʤ > j
