@@ -17,7 +17,6 @@ let language = "test.lang";
 if (positionals.length > 0)
     language = positionals[0];
 
-console.log(`Using language: ${language}`);
 const def = await Bun.file(language).text();
 
 try {
